@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:algolia/algolia.dart';
 import 'package:flutter_algolia/channel.dart';
+import 'package:flutter_algolia/add_channel_page.dart';
 
 void main() async {
   await DotEnv().load('.env');
@@ -120,7 +121,15 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
             floatingActionButton: FloatingActionButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (BuildContext context) => AddChannel(),
+                  ),
+                );
+              },
               tooltip: 'Increment',
               child: Icon(Icons.add),
             ),
