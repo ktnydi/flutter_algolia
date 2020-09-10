@@ -112,6 +112,13 @@ class _AddChannelState extends State<AddChannel> {
         .updateData(newData);
   }
 
+  Future _deleteChannel() async {
+    await algolia.instance
+        .index('sample')
+        .object(widget.objectID)
+        .deleteObject();
+  }
+
   @override
   Widget build(BuildContext context) {
     final _formKey = GlobalKey<FormState>();
@@ -120,6 +127,51 @@ class _AddChannelState extends State<AddChannel> {
     return Scaffold(
       appBar: AppBar(
         title: !isUpdated ? Text('チャンネルを追加') : Text('チャンネルを更新'),
+        actions: [
+          isUpdated
+              ? IconButton(
+                  icon: Icon(Icons.delete_outline),
+                  onPressed: () async {
+                    if (!_formKey.currentState.validate()) return;
+
+                    final confirm = await _confirmDialog(
+                      titleText: '削除',
+                      contentText: 'チャンネルを削除します。',
+                      doneText: '削除する',
+                    );
+
+                    if (!confirm) return;
+
+                    try {
+                      this._deleteChannel();
+
+                      Navigator.pop(context);
+                    } catch (e) {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('エラー'),
+                            content: Text(e.toString()),
+                            actions: [
+                              FlatButton(
+                                child: Text(
+                                  'OK',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  },
+                )
+              : SizedBox(),
+        ],
       ),
       body: SingleChildScrollView(
         child: Container(
