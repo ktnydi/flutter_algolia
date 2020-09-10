@@ -90,6 +90,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         decoration: InputDecoration(
                           border: InputBorder.none,
+                          icon: Icon(
+                            Icons.search,
+                            color: Colors.white,
+                          ),
                           hintText: '検索',
                           hintStyle: TextStyle(
                             color: Colors.white,
@@ -100,11 +104,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         },
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.search),
-                      onPressed: () {
-                        this.searchChannel(text: searchController.text);
-                      },
+                    Image.asset(
+                      'images/algolia-icon.png',
+                      width: 32,
                     ),
                   ],
                 ),
