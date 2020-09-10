@@ -3,6 +3,17 @@ import 'package:algolia/algolia.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AddChannel extends StatefulWidget {
+  AddChannel({
+    this.objectID,
+    this.id = '',
+    this.name = '',
+    this.numRegisters = '',
+  });
+
+  final String objectID;
+  final String id;
+  final String name;
+  final String numRegisters;
   @override
   _AddChannelState createState() => _AddChannelState();
 }
@@ -12,9 +23,17 @@ class _AddChannelState extends State<AddChannel> {
     applicationId: DotEnv().env['APPLICATION_ID'],
     apiKey: DotEnv().env['API_KEY'],
   );
-  final id = TextEditingController();
-  final name = TextEditingController();
-  final numRegisters = TextEditingController();
+  var id = TextEditingController();
+  var name = TextEditingController();
+  var numRegisters = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    id = TextEditingController(text: widget.id);
+    name = TextEditingController(text: widget.name);
+    numRegisters = TextEditingController(text: widget.numRegisters);
+  }
 
   @override
   void dispose() {
@@ -81,13 +100,26 @@ class _AddChannelState extends State<AddChannel> {
     await algolia.instance.index('sample').addObject(newData);
   }
 
+  Future _updateChannel() async {
+    final newData = {
+      'id': int.parse(id.text),
+      'name': name.text,
+      'numRegisters': int.parse(numRegisters.text),
+    };
+    await algolia.instance
+        .index('sample')
+        .object(widget.objectID)
+        .updateData(newData);
+  }
+
   @override
   Widget build(BuildContext context) {
     final _formKey = GlobalKey<FormState>();
+    final isUpdated = widget.objectID != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('チャンネルを追加'),
+        title: !isUpdated ? Text('チャンネルを追加') : Text('チャンネルを更新'),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -158,21 +190,31 @@ class _AddChannelState extends State<AddChannel> {
                     color: Colors.blue,
                     textColor: Colors.white,
                     child: Text(
-                      '登録する',
+                      !isUpdated ? '登録する' : '更新する',
                     ),
                     onPressed: () async {
                       if (!_formKey.currentState.validate()) return;
 
-                      final confirm = await _confirmDialog(
-                        titleText: '登録する',
-                        contentText: '入力した内容で登録します。',
-                        doneText: '登録する',
-                      );
+                      final confirm = !isUpdated
+                          ? await _confirmDialog(
+                              titleText: '登録する',
+                              contentText: '入力した内容で登録します。',
+                              doneText: '登録する',
+                            )
+                          : await _confirmDialog(
+                              titleText: '更新する',
+                              contentText: '変更した内容で更新します。',
+                              doneText: '更新する',
+                            );
 
                       if (!confirm) return;
 
                       try {
-                        await this._addChannel();
+                        if (!isUpdated) {
+                          await this._addChannel();
+                        } else {
+                          await this._updateChannel();
+                        }
 
                         Navigator.pop(context);
                       } catch (e) {

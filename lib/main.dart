@@ -56,7 +56,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
     AlgoliaQuery query = algolia.instance.index('sample').search(text);
     AlgoliaQuerySnapshot snap = await query.getObjects();
-    final channels = snap.hits.map((hit) => Channel(hit.data)).toList();
+    final channels = snap.hits
+        .map(
+          (hit) => Channel(hit.objectID, hit.data),
+        )
+        .toList();
     setState(
       () {
         this.channels = channels;
@@ -114,6 +118,20 @@ class _MyHomePageState extends State<MyHomePage> {
                     return ListTile(
                       title: Text(channel.name),
                       subtitle: Text('${channel.numRegisters} registers'),
+                      onLongPress: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => AddChannel(
+                              objectID: channel.objectID,
+                              id: '${channel.id}',
+                              name: channel.name,
+                              numRegisters: '${channel.numRegisters}',
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ).toList();
